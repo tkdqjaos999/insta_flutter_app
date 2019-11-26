@@ -1,14 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AccountPage extends StatefulWidget {
+  final FirebaseUser user;
+
+  AccountPage(this.user);
+
   @override
   _AccountPageState createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  int _postCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +25,24 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    Firestore.instance.collection('post').where('email', isEqualTo: widget.user.email)
+    .getDocuments()
+    .then((snapShot){
+      setState(() {
+        _postCount = snapShot.documents.length;
+      });
+    });
+  }
+
   Widget _buildAppBar() {
     return AppBar(
       actions: <Widget>[
         IconButton(
             icon: Icon(Icons.exit_to_app),
             onPressed: (){
-              Navigator.pop(context);
               FirebaseAuth.instance.signOut();
               _googleSignIn.signOut();
             },
@@ -48,7 +66,7 @@ class _AccountPageState extends State<AccountPage> {
                     width: 80.0,
                     height: 80.0,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage('https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F99A0293359992A3E38'),
+                      backgroundImage: NetworkImage(widget.user.photoUrl),
                     ),
                   ),
                   Container(
@@ -82,10 +100,10 @@ class _AccountPageState extends State<AccountPage> {
                 ],
               ),
               Padding(padding: EdgeInsets.all(8.0)),
-              Text('이름', style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold),),
+              Text(widget.user.displayName, style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold),),
             ],
           ),
-          Text('0\n게시물',
+          Text('$_postCount\n게시물',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 18.0),
           ),
