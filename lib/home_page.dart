@@ -5,7 +5,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text('Instagram Clone',
+        title: Center(child: Text('Instagram Clon',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,),
         ),
       ),),
